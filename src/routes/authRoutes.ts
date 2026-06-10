@@ -72,6 +72,6 @@ authRoutes.post("/login", async (req: Request, res: Response) => {
 
 // 🎯 TODO 10: GET /logout — req.session.destroy
 authRoutes.get("/logout", (req: Request, res: Response) => {
+  req.session.destroy(() => res.redirect("/login"))
   // TODO: destruir session
-  res.redirect("/login");
 });
