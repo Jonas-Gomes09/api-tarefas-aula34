@@ -76,7 +76,7 @@ export async function registrar(nome: string, email: string, senha: string): Pro
         return null
     }
 
-    const senhaEncriptada = String(bcrypt.hash(senha, SALT_ROUNDS))
+    const senhaEncriptada = await bcrypt.hash(senha, SALT_ROUNDS)
     const novo = {id: (Users.at(-1)?.id ?? 0)+1, nome, email, senha: senhaEncriptada}
     Users.push(novo)
     await salvar(Users)
@@ -87,7 +87,7 @@ export async function login(email: string, senha: string): Promise<User | null> 
     const Users = await carregar()
     const user = Users.find(a => a.email === email)
     if (!user) {
-        throw new Error("Email inexistente")
+        return null
     }
 
     const comparacao = await bcrypt.compare(senha, user.senha)

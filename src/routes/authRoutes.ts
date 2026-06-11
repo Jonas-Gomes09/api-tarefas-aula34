@@ -9,14 +9,22 @@ import { Router, Request, Response } from "express";
 
 export const authRoutes = Router();
 
+authRoutes.get("/", (req: Request, res: Response) => {
+  res.redirect("/registro")
+})
+
 // 🎯 TODO 6: GET /login — renderizar "login" com flash
 authRoutes.get("/login", (req: Request, res: Response) => {
-  res.render("login", { flash: null });
+  const flash = req.session.flash
+  req.session.flash = null
+  res.render("login", { flash });
 });
 
 // 🎯 TODO 7: GET /registro — renderizar "registro" com flash
 authRoutes.get("/registro", (req: Request, res: Response) => {
-  res.render("registro", { flash: null });
+  const flash = req.session.flash
+  req.session.flash = null
+  res.render("registro", { flash });
 });
 
 // 🎯 TODO 8: POST /registro
@@ -31,11 +39,11 @@ authRoutes.post("/registro", async (req: Request, res: Response) => {
 
   if (!nome || nome.trim() === "") {
     req.session.flash = "Insira um nome de usuário."
-    res.redirect("/registro");
+    return res.redirect("/registro");
   }
-  if (!email || email.includes("@")) {
+  if (!email || !email.includes("@")) {
     req.session.flash = "Insira um email válido."
-    res.redirect("/registro");
+    return res.redirect("/registro");
   }
   if (!senha || senha.length < 6) {
     req.session.flash = "Senha deve conter ao menos 6 caracteres.";
@@ -45,7 +53,7 @@ authRoutes.post("/registro", async (req: Request, res: Response) => {
   const registrar = await UserModel.registrar(nome, email, senha)
   if (registrar === null) {
     req.session.flash = "Usuário já existe!"
-    res.redirect("/registro");
+    return res.redirect("/registro");
   }
 
   req.session.flash = "Conta criada!"
@@ -62,10 +70,10 @@ authRoutes.post("/login", async (req: Request, res: Response) => {
   const login = await UserModel.login(email, senha)
   if (login === null) {
     req.session.flash = "Email ou senha incorretos"
-    res.redirect("/login")
+    return res.redirect("/login")
   } else {
-    req.session.userId = 
-    req.session.userName = email
+    req.session.userId = login.id
+    req.session.userName = login.email
     res.redirect("/tarefas")
   }
 });
